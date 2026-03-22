@@ -3,7 +3,7 @@ import json
 
 class Producto:
 
-    def __init__(self, nombre: str, precio: float, cantidad: int, unidad: str):
+    def __init__(self, nombre: str, precio: float, cantidad: int):
 
         if not nombre.strip():
             raise ValueError("El nombre del producto no puede estar vacío")
@@ -14,29 +14,25 @@ class Producto:
         if cantidad < 0:
             raise ValueError("La cantidad no puede ser negativa")
 
-        if unidad.lower() not in ["kg", "l", "unidad"]:
-            raise ValueError("Unidad inválida. Use: kg, l o unidad")
-
         self.nombre = nombre
         self.precio = precio
         self.cantidad = cantidad
-        self.unidad = unidad.lower()
 
-    def actualizar_precio(self, nuevo_precio: float):
+    def actualizar_precio(self, nuevo_precio: float) -> None:
 
         if nuevo_precio < 0:
             raise ValueError("El precio no puede ser negativo")
 
         self.precio = nuevo_precio
 
-    def actualizar_cantidad(self, nueva_cantidad: int):
+    def actualizar_cantidad(self, nueva_cantidad: int) -> None:
 
         if nueva_cantidad < 0:
             raise ValueError("La cantidad no puede ser negativa")
 
         self.cantidad = nueva_cantidad
 
-    def calcular_valor_total(self):
+    def calcular_valor_total(self) -> float:
 
         return self.precio * self.cantidad
 
@@ -45,13 +41,12 @@ class Producto:
         return {
             "nombre": self.nombre,
             "precio": self.precio,
-            "cantidad": self.cantidad,
-            "unidad": self.unidad
+            "cantidad": self.cantidad
         }
 
-    def __str__(self):
+    def __str__(self) -> str:
 
-        return f"{self.nombre:<15} | Precio: S/ {self.precio:.2f} por {self.unidad} | Cantidad: {self.cantidad} {self.unidad} | Total: S/ {self.calcular_valor_total():.2f}"
+        return f"{self.nombre:<15} | Precio: S/ {self.precio:.2f} | Cantidad: {self.cantidad} | Total: S/ {self.calcular_valor_total():.2f}"
 
 
 class Inventario:
@@ -92,7 +87,6 @@ class Inventario:
         producto = self.buscar_producto(nombre)
 
         if producto:
-
             self.productos.remove(producto)
             return True
 
@@ -101,14 +95,12 @@ class Inventario:
     def listar_productos(self):
 
         if not self.productos:
-
             print("\nInventario vacío\n")
             return
 
         print("\n=========== INVENTARIO ===========")
 
         for p in self.productos:
-
             print(p)
 
         print("==================================")
@@ -118,7 +110,6 @@ class Inventario:
         total = 0
 
         for p in self.productos:
-
             total += p.calcular_valor_total()
 
         return total
@@ -128,19 +119,15 @@ class Inventario:
         datos = []
 
         for p in self.productos:
-
             datos.append(p.to_dict())
 
         with open("inventario.json", "w") as f:
-
             json.dump(datos, f, indent=4)
 
     def cargar_archivo(self):
 
         try:
-
             with open("inventario.json", "r") as f:
-
                 datos = json.load(f)
 
             for item in datos:
@@ -148,14 +135,12 @@ class Inventario:
                 producto = Producto(
                     item["nombre"],
                     item["precio"],
-                    item["cantidad"],
-                    item["unidad"]
+                    item["cantidad"]
                 )
 
                 self.productos.append(producto)
 
         except FileNotFoundError:
-
             pass
 
 
@@ -165,19 +150,19 @@ def mostrar_menu():
 ========= SISTEMA DE INVENTARIO =========
 
 1. Agregar producto
-2. Buscar producto exacto
-3. Buscar producto parcial
-4. Listar productos
-5. Actualizar producto
-6. Eliminar producto
-7. Calcular valor total inventario
-8. Guardar inventario
-9. Salir
+2. Buscar producto
+3. Listar productos
+4. Calcular valor total del inventario
+5. Salir
 
 """)
 
 
-def menu_principal(inventario):
+def menu_principal():
+
+    inventario = Inventario()
+
+    inventario.cargar_archivo()
 
     while True:
 
@@ -190,14 +175,10 @@ def menu_principal(inventario):
             if opcion == "1":
 
                 nombre = input("Nombre del producto: ")
-
-                precio = float(input("Precio por kg/l/unidad: "))
-
+                precio = float(input("Precio: "))
                 cantidad = int(input("Cantidad: "))
 
-                unidad = input("Unidad (kg / l / unidad): ")
-
-                producto = Producto(nombre, precio, cantidad, unidad)
+                producto = Producto(nombre, precio, cantidad)
 
                 inventario.agregar_producto(producto)
 
@@ -210,78 +191,21 @@ def menu_principal(inventario):
                 producto = inventario.buscar_producto(nombre)
 
                 if producto:
-
                     print(producto)
-
                 else:
-
                     print("Producto no encontrado")
 
             elif opcion == "3":
 
-                texto = input("Texto a buscar: ")
-
-                resultados = inventario.buscar_parcial(texto)
-
-                if resultados:
-
-                    for p in resultados:
-                        print(p)
-
-                else:
-
-                    print("No se encontraron coincidencias")
+                inventario.listar_productos()
 
             elif opcion == "4":
 
-                inventario.listar_productos()
-
-            elif opcion == "5":
-
-                nombre = input("Producto a actualizar: ")
-
-                producto = inventario.buscar_producto(nombre)
-
-                if not producto:
-
-                    print("Producto no encontrado")
-                    continue
-
-                nuevo_precio = float(input("Nuevo precio: "))
-
-                nueva_cantidad = int(input("Nueva cantidad: "))
-
-                producto.actualizar_precio(nuevo_precio)
-
-                producto.actualizar_cantidad(nueva_cantidad)
-
-                print("Producto actualizado")
-
-            elif opcion == "6":
-
-                nombre = input("Producto a eliminar: ")
-
-                if inventario.eliminar_producto(nombre):
-
-                    print("Producto eliminado")
-
-                else:
-
-                    print("Producto no encontrado")
-
-            elif opcion == "7":
-
                 total = inventario.calcular_valor_inventario()
 
-                print(f"\nValor total inventario: S/ {total:.2f}")
+                print(f"\nValor total del inventario: S/ {total:.2f}")
 
-            elif opcion == "8":
-
-                inventario.guardar_archivo()
-
-                print("Inventario guardado correctamente")
-
-            elif opcion == "9":
+            elif opcion == "5":
 
                 inventario.guardar_archivo()
 
@@ -304,8 +228,4 @@ def menu_principal(inventario):
 
 if __name__ == "__main__":
 
-    inventario = Inventario()
-
-    inventario.cargar_archivo()
-
-    menu_principal(inventario)
+    menu_principal()
