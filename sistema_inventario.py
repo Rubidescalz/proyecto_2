@@ -3,10 +3,10 @@ import json
 
 class Producto:
 
-    def __init__(self, nombre: str, precio: float, cantidad: float, unidad: str):
+    def __init__(self, nombre: str, precio: float, cantidad: int, unidad: str):
 
         if not nombre.strip():
-            raise ValueError("El nombre no puede estar vacío")
+            raise ValueError("El nombre del producto no puede estar vacío")
 
         if precio < 0:
             raise ValueError("El precio no puede ser negativo")
@@ -15,21 +15,21 @@ class Producto:
             raise ValueError("La cantidad no puede ser negativa")
 
         if unidad.lower() not in ["kg", "l", "unidad"]:
-            raise ValueError("Unidad inválida. Use kg, l o unidad")
+            raise ValueError("Unidad inválida. Use: kg, l o unidad")
 
         self.nombre = nombre
         self.precio = precio
         self.cantidad = cantidad
         self.unidad = unidad.lower()
 
-    def actualizar_precio(self, nuevo_precio):
+    def actualizar_precio(self, nuevo_precio: float):
 
         if nuevo_precio < 0:
             raise ValueError("El precio no puede ser negativo")
 
         self.precio = nuevo_precio
 
-    def actualizar_cantidad(self, nueva_cantidad):
+    def actualizar_cantidad(self, nueva_cantidad: int):
 
         if nueva_cantidad < 0:
             raise ValueError("La cantidad no puede ser negativa")
@@ -63,7 +63,7 @@ class Inventario:
     def agregar_producto(self, producto):
 
         if self.buscar_producto(producto.nombre):
-            raise ValueError("El producto ya existe")
+            raise ValueError("El producto ya existe en el inventario")
 
         self.productos.append(producto)
 
@@ -159,7 +159,7 @@ class Inventario:
             pass
 
 
-def menu():
+def mostrar_menu():
 
     print("""
 ========= SISTEMA DE INVENTARIO =========
@@ -181,7 +181,7 @@ def menu_principal(inventario):
 
     while True:
 
-        menu()
+        mostrar_menu()
 
         opcion = input("Seleccione una opción: ")
 
@@ -193,7 +193,7 @@ def menu_principal(inventario):
 
                 precio = float(input("Precio por kg/l/unidad: "))
 
-                cantidad = float(input("Cantidad: "))
+                cantidad = int(input("Cantidad: "))
 
                 unidad = input("Unidad (kg / l / unidad): ")
 
@@ -249,7 +249,7 @@ def menu_principal(inventario):
 
                 nuevo_precio = float(input("Nuevo precio: "))
 
-                nueva_cantidad = float(input("Nueva cantidad: "))
+                nueva_cantidad = int(input("Nueva cantidad: "))
 
                 producto.actualizar_precio(nuevo_precio)
 
@@ -279,7 +279,7 @@ def menu_principal(inventario):
 
                 inventario.guardar_archivo()
 
-                print("Inventario guardado en archivo JSON")
+                print("Inventario guardado correctamente")
 
             elif opcion == "9":
 
@@ -293,13 +293,13 @@ def menu_principal(inventario):
 
                 print("Opción inválida")
 
-        except ValueError:
+        except ValueError as e:
 
-            print("Error: tipo de dato inválido")
+            print("Error:", e)
 
         except Exception as e:
 
-            print("Error:", e)
+            print("Error inesperado:", e)
 
 
 if __name__ == "__main__":
